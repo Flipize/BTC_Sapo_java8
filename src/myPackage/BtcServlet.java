@@ -3,6 +3,11 @@ package myPackage;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +27,17 @@ import java.util.TimeZone;
 
 public class BtcServlet extends HttpServlet
 {
+    private static String getCoronaCases() throws IOException {
+        Document doc = Jsoup.connect("https://www.worldometers.info/coronavirus/countries-where-coronavirus-has-spread/").userAgent("Mozilla").get();
+        Elements elements = doc.select("table tr");
+
+        for (Element e : elements) {
+            if (e.select("td:eq(0)").text().equals("Sweden")) {
+                return e.select("td:eq(1)").text();
+            }
+        }
+        return "null";
+    }
 
     private static String getBtcPrice(String api_url, JsonParser jsonParser) throws IOException {
         URL url = new URL(api_url);
@@ -78,8 +94,14 @@ public class BtcServlet extends HttpServlet
             Graphics2D valueG2d;
             Graphics2D timeG2d;
             Graphics2D xrp;
+            Graphics2D corona;
 
             if (img != null) {
+
+                corona = img.createGraphics();
+                corona.setColor(Color.yellow);
+                corona.setFont(new Font("SanSerif", Font.PLAIN, 28));
+                corona.drawString("Corona in Sweden: " + getCoronaCases(), img.getWidth() - 320, img.getHeight() - 200);
 
                 valueG2d = img.createGraphics();
                 valueG2d.setColor(Color.yellow);
